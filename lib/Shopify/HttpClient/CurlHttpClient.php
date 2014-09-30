@@ -100,6 +100,42 @@ class CurlHttpClient extends HttpClientAdapter
         return $this->makeRequest($ch);
 
     }
+    
+    public function put($uri, $params = null)
+    {
+    
+        $ch = $this->initCurlHandler($uri);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    
+        if (!is_null($params) && !is_array($params)) {
+            $this->headers[] = 'Content-Type: application/json';
+        }
+    
+        if (!is_null($params)) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        }
+    
+        return $this->makeRequest($ch);
+    
+    }
+    
+    public function delete($uri, $params = null)
+    {
+    
+        $ch = $this->initCurlHandler($uri);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+    
+        if (!is_null($params) && !is_array($params)) {
+            $this->headers[] = 'Content-Type: application/json';
+        }
+    
+        if (!is_null($params)) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        }
+    
+        return $this->makeRequest($ch);
+    
+    }
 
     /**
      * initialize the cURL handler
