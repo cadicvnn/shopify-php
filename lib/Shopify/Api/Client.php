@@ -259,9 +259,11 @@ class Client
             case HttpClient::PUT:
                 $data = json_encode($params);
                 $response = $this->getHttpClient()->put($uri, $data);
+                break;
             case HttpClient::DELETE:
                 $data = json_encode($params);
                 $response = $this->getHttpClient()->delete($uri, $data);
+                break;
             default:
                 throw new \RuntimeException(
                     'Currently only "GET" and "POST" are supported. "PUT" and '
