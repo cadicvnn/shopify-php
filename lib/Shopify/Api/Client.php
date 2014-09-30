@@ -97,6 +97,28 @@ class Client
     {
         return $this->makeApiRequest($resource, $data, HttpClient::POST);
     }
+    
+    /**
+     * make a PUT request to the Shopify API
+     * @param string $resource
+     * @param array $data
+     * @return \stdClass
+     */
+    public function put($resource, array $data = array())
+    {
+        return $this->makeApiRequest($resource, $data, HttpClient::PUT);
+    }
+    
+    /**
+     * make a DELETE request to the Shopify API
+     * @param string $resource
+     * @param array $data
+     * @return \stdClass
+     */
+    public function delete($resource, array $data = array())
+    {
+        return $this->makeApiRequest($resource, $data, HttpClient::DELETE);
+    }
 
     /**
      * generate the signature as required by shopify

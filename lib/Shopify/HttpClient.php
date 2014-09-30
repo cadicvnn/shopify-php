@@ -38,7 +38,7 @@ interface HttpClient
      * @param array $params
      * @return mixed
      */
-    public function put($uri, array $params = array());
+    public function put($uri, array $params = null);
     
     /**
      * make a delete request to the given uri
