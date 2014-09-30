@@ -35,10 +35,10 @@ interface HttpClient
     /**
      * make a put request to the given uri
      * @param string $uri
-     * @param array $params
+     * @param array|string $params
      * @return mixed
      */
-    public function put($uri, array $params = null);
+    public function put($uri, $params = null);
     
     /**
      * make a delete request to the given uri
