@@ -266,16 +266,11 @@ class Client
                 break;
             default:
                 throw new \RuntimeException(
-                    'Currently only "GET" and "POST" are supported. "PUT" and '
-                    . '"DELETE" functionality is currently under development'
+                    'Currently only "GET", "POST", "PUT" and "DELETE" are supported'
                 );
         }
 
         $response = json_decode($response);
-
-        if (isset($response->errors)) {
-            throw new \RuntimeException($response->errors);
-        }
 
         return $response;
 
