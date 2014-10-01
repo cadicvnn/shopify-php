@@ -145,7 +145,7 @@ class CurlHttpClient extends HttpClientAdapter
     protected function initCurlHandler($uri)
     {
 
-        $headers = array();
+        $this->$headers = array();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uri);
