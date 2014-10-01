@@ -145,11 +145,11 @@ class CurlHttpClient extends HttpClientAdapter
     protected function initCurlHandler($uri)
     {
 
-        $this->$headers = array();
+        $this->headers = array();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uri);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'offshoot/shopify-php client');
+        curl_setopt($ch, CURLOPT_USERAGENT, 'cadicvnn/shopify-php client');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->verifyHost);
 
