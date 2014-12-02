@@ -105,6 +105,7 @@ class CurlHttpClient extends HttpClientAdapter
     {
     
         $ch = $this->initCurlHandler($uri);
+	curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
     
         if (!is_null($params) && !is_array($params)) {
