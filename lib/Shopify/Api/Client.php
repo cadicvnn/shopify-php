@@ -280,7 +280,7 @@ class Client
      * get the HTTP Client
      * @return HttpClient
      */
-    protected function getHttpClient()
+    public function getHttpClient()
     {
         return $this->httpClient;
     }
