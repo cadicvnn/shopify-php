@@ -5,6 +5,21 @@ namespace Shopify\Api\Tests;
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $httpClient;
+
+    /**
+     * @var \Shopify\Api\Client
+     */
+    protected $api;
+
+    protected $shopName;
+    protected $clientSecret;
+    protected $permanentAccessToken;
+    protected $shopUri;
+
     public function setUp()
     {
 
