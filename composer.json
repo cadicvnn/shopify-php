@@ -1,14 +1,15 @@
 {
-  "name": "cadicvnn/shopify-php",
+  "name": "cdyweb/shopify-php",
   "type": "library",
   "description": "Simple Shopify API client in PHP",
   "keywords": ["shopify","api"],
-  "homepage": "https://github.com/cadicvnn/shopify-php",
+  "homepage": "https://github.com/cdyweb/shopify-php",
   "license": "MIT",
   "authors": [
     {
-      "name": "Cadic",
-      "role": "Developer"
+      "name": "Erwin Kooi",
+      "role": "Developer",
+      "homepage": "http://cdyweb.com"
     },
     {
       "name": "Chris Woodford",
