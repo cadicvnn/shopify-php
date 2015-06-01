@@ -8,6 +8,7 @@ use \Shopify\Api\AuthenticationGateway;
 use \Shopify\HttpClient\CurlHttpClient;
 use \Shopify\Redirector\HeaderRedirector;
 
+if (!file_exists('settings.json')) copy('settings.json.dist','settings.json');
 $settings=json_decode(file_get_contents('settings.json'));
 $settings->shopName = $_GET['shopName'];
 $settings->redirectUri = "http://{$_SERVER['HTTP_HOST']}".dirname($_SERVER['REQUEST_URI']).'/';

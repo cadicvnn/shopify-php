@@ -16,7 +16,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     protected $api;
 
     public $shopName;
-    public $sharedSecret;
+    public $clientSecret;
     public $accessToken;
     public $shopUri;
 
@@ -24,13 +24,17 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
 
         $this->shopName = 'mycoolshop';
-        $this->sharedSecret = 'ABC123XYZ';
+        $this->clientSecret = 'ABC123XYZ';
         $this->accessToken = '0987654321';
         $this->shopUri = "https://{$this->shopName}.myshopify.com";
 
         $this->httpClient = $this->getMock('Shopify\HttpClient');
 
-        $this->api = new \Shopify\Api\Client($this->httpClient, $this);
+        $this->api = new \Shopify\Api\Client($this->httpClient);
+        $this->api->setShopName($this->shopName);
+        $this->api->setClientSecret($this->clientSecret);
+        $this->api->setAccessToken($this->accessToken);
+
     }
 
     public function testGetRequest()
@@ -77,45 +81,27 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function getValidationData() {
-        return [
-            ['hush','31b9fcfbd98a3650b8523bcc92f8c5d2',[
-                'code' => "a94a110d86d2452eb3e2af4cfb8a3828",
-                'shop' => "some-shop.myshopify.com",
-                'timestamp' => "1337178173", // 2012-05-16 14:22:53
-            ], false],
-            ['hush','6e39a2ea9e497af6cb806720da1f1bf3',[
-                'code'=>'a94a110d86d2452eb3e2af4cfb8a3828',
-                'hmac'=>'2cb1a277650a659f1b11e92a4a64275b128e037f2c3390e3c8fd2d8721dac9e2',
-                'shop'=>'some-shop.myshopify.com',
-                'timestamp'=>'1337178173',
-            ], false],
-            ['hush','2cb1a277650a659f1b11e92a4a64275b128e037f2c3390e3c8fd2d8721dac9e2',[
-                'code'=>'a94a110d86d2452eb3e2af4cfb8a3828',
-                'shop'=>'some-shop.myshopify.com',
-                'timestamp'=>'1337178173',
-            ], true]
-
-        ];
-    }
-
-    /**
-     * @dataProvider getValidationData
-     */
-    public function testRequestValidation($secret, $signature, $params, $hmac)
+    public function testRequestValidation()
     {
 
-        $this->api->setClientSecret($secret);
+        $this->api->setClientSecret('hush');
 
-        $this->assertEquals($signature, $this->api->generateSignature($params, $hmac));
+        $digest = "2cb1a277650a659f1b11e92a4a64275b128e037f2c3390e3c8fd2d8721dac9e2";
 
-        $paramsWithSignature = $params;
-        $paramsWithSignature[$hmac?'hmac':'signature'] = $signature;
+        // Assume we have the query parameters in a hash
+        $params = array(
+            'shop' => "some-shop.myshopify.com",
+            'code' => "a94a110d86d2452eb3e2af4cfb8a3828",
+            'timestamp' => "1337178173", // 2012-05-16 14:22:53
+            'hmac' => $digest
+        );
 
-        $this->assertTrue($this->api->validateSignature($paramsWithSignature), "{$signature} failed");
+        $this->assertEquals($digest, $this->api->generateSignature($params));
+
+        $this->assertTrue($this->api->validateSignature($params));
 
         // request is older than 1 day, expect false
-        $this->assertFalse($this->api->isValidRequest($paramsWithSignature));
+        $this->assertFalse($this->api->isValidRequest($params));
 
     }
 
