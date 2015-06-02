@@ -116,9 +116,10 @@ class Client
     /**
      * @param $secret
      * @param array $request
+	 * @param string $implode_with (the proxy validation uses no separator)
      * @return string
      */
-    public static function doGenerateSignature($clientSecret, array $request)
+    public static function doGenerateSignature($clientSecret, array $request, $implode_with='&')
     {
         $params = $request;
 
@@ -137,7 +138,7 @@ class Client
         sort($collected);
 
         // and concatenated together with & to create a single string
-        $collected = implode('&', $collected);
+        $collected = implode($implode_with, $collected);
 
         // this string processed through an HMAC-SHA256 using the Shared Secret
         // as the key
