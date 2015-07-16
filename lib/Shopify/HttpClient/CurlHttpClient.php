@@ -11,7 +11,7 @@ class CurlHttpClient extends HttpClientAdapter
      * set to false to stop cURL from verifying the peer's certificate
      * @var boolean
      */
-    protected $verifyPeer = true;
+    protected $verifyPeer;
 
     /**
      * set to 1 to check the existence of a common name in the SSL peer
@@ -22,7 +22,7 @@ class CurlHttpClient extends HttpClientAdapter
      * be kept at 2 (default value).
      * @var integer
      */
-    protected $verifyHost = 2;
+    protected $verifyHost;
 
     /**
      * The name of a file holding one or more certificates to verify
@@ -42,11 +42,14 @@ class CurlHttpClient extends HttpClientAdapter
      *
      *
      * @param string $certificatePath
+     * @param bool $verifyPeer
      */
-    public function __construct($certificatePath = null)
+    public function __construct($certificatePath = null, $verifyPeer=true, $verifyHost=2)
     {
 
         $this->certificatePath = $certificatePath;
+        $this->verifyPeer = $verifyPeer;
+        $this->verifyHost = $verifyHost;
         $this->headers = array();
 
     }
@@ -162,7 +165,6 @@ class CurlHttpClient extends HttpClientAdapter
         if ($this->verifyPeer === false) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         } else {
-
             // @see http://curl.haxx.se/docs/caextract.html
 
             if (!file_exists($this->certificatePath)) {

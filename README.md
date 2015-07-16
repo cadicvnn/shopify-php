@@ -9,7 +9,7 @@ The canoncial repository for this stream of development is
 
 This API Client is still in a pre-1.0 state, so you can expect:
 * some bugs (feel free to submit a pull request with bug fixes and test coverage)
-* possibly some breaking API changes between v0.9 and v1.0
+* possibly some breaking API changes between v0.10 and v1.0
 
 ## Requirements
 
@@ -29,7 +29,7 @@ root directory and require shopify-php:
 
     {
       "require": {
-        "offshoot/shopify-php": "0.9.x"
+        "offshoot/shopify-php": "0.10.x"
       }
     }
 
@@ -47,7 +47,7 @@ might look something like this:
 
     {
       "require": {
-        "offshoot/shopify-php": "0.9.x",
+        "offshoot/shopify-php": "0.10.x",
         "haxx-se/curl": "1.0.0"
       },
       "repositories": [

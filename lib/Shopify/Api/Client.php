@@ -23,7 +23,7 @@ class Client
      * the shared secret created by Shopify
      * @var string
      */
-    protected $sharedSecret;
+    protected $clientSecret;
 
     /**
      * the http client used to make requests to the shopify api
@@ -34,10 +34,14 @@ class Client
     /**
      * initialize the API client
      * @param HttpClient $client
+     * @param $options
      */
-    public function __construct(HttpClient $client)
+    public function __construct(HttpClient $client, $options=null)
     {
         $this->httpClient = $client;
+        if (is_object($options)) foreach (get_object_vars($this) as $key=>$value) {
+            if (isset($options->$key)) $this->$key = $options->$key;
+        }
     }
 
     /**
@@ -64,7 +68,7 @@ class Client
      */
     public function setClientSecret($secret)
     {
-        $this->sharedSecret = $secret;
+        $this->clientSecret = $secret;
     }
 
     /**
@@ -97,77 +101,78 @@ class Client
     {
         return $this->makeApiRequest($resource, $data, HttpClient::POST);
     }
-    
-    /**
-     * make a PUT request to the Shopify API
-     * @param string $resource
-     * @param array $data
-     * @return \stdClass
-     */
-    public function put($resource, array $data = array())
-    {
-        return $this->makeApiRequest($resource, $data, HttpClient::PUT);
-    }
-    
-    /**
-     * make a DELETE request to the Shopify API
-     * @param string $resource
-     * @param array $data
-     * @return \stdClass
-     */
-    public function delete($resource, array $data = array())
-    {
-        return $this->makeApiRequest($resource, $data, HttpClient::DELETE);
-    }
 
     /**
      * generate the signature as required by shopify
-     * @param array $params
+     * @param array $request
+     * @see https://docs.shopify.com/api/authentication/oauth#confirming-installation
      * @return string
      */
-    public function generateSignature(array $params)
+    public function generateSignature(array $request)
     {
+        return self::doGenerateSignature($this->getClientSecret(), $request);
+    }
 
-        // Collect the URL parameters into an array of elements of the format
-        // "$parameter_name=$parameter_value"
+    /**
+     * @param $secret
+     * @param array $request
+	 * @param string $implode_with (the proxy validation uses no separator)
+     * @return string
+     */
+    public static function doGenerateSignature($clientSecret, array $request, $implode_with='&')
+    {
+        $params = $request;
 
-        $calculated = array();
+        // The signature and hmac entries are removed from the map, leaving the
+        // remaining parameters.
+        unset($params['signature']);
+        unset($params['hmac']);
 
-        foreach ($params as $key => $value) {
-            $calculated[] = $key . "=" . $value;
-        }
+        // Each key is concatenated with its value, seperated by an = character,
+        // to create a list of strings
+        $collected = array_map(function($key, $value) {
+            return $key . "=" . $value;
+        }, array_keys($params), $params);
 
-        // Sort the key/value pairs in the array
-        sort($calculated);
+        // The list of key-value pairs is sorted lexicographically
+        sort($collected);
 
-        // Join the array elements into a string
-        $calculated = implode('', $calculated);
+        // and concatenated together with & to create a single string
+        $collected = implode($implode_with, $collected);
 
-        // Final calculated_signature to compare against
-        return md5($this->getClientSecret() . $calculated);
-
+        // this string processed through an HMAC-SHA256 using the Shared Secret
+        // as the key
+        return hash_hmac('sha256', $collected, $clientSecret);
     }
 
     /**
      * validate the signature on the supplied query parameters
+     * @param array $request
      * @return boolean
      */
-    public function validateSignature(array $params)
+    public function validateSignature(array $request)
     {
-
         $this->assertRequestParamIsNotNull(
-            $params, 'signature', 'Expected signature in query params'
+            $request, 'hmac', 'Expected signature in query params'
         );
+        return self::doValidateSignature($this->getClientSecret(), $request);
+    }
 
-        $signature = $params['signature'];
-        unset($params['signature']);
-
-        return $this->generateSignature($params) === $signature;
-
+    /**
+     * @param string $secret
+     * @param array $request
+     * @return bool
+     * @throws RequestException
+     */
+    public static function doValidateSignature($clientSecret, array $request)
+    {
+        $hmac = $request['hmac'];
+        return self::doGenerateSignature($clientSecret, $request) === $hmac;
     }
 
     /**
      * returns true if the supplied request params are valid
+     * @param array $params
      * @return boolean
      */
     public function isValidRequest(array $params)
@@ -187,6 +192,7 @@ class Client
 
     /**
      * get the number of calls made to the shopify api
+     * @param array $headers
      * @return integer
      */
     public function getNumberOfCallsMade(array $headers)
@@ -196,6 +202,7 @@ class Client
 
     /**
      * get the total number of calls that can be made to the shopify api
+     * @param array $headers
      * @return integer
      */
     public function getCallLimit(array $headers)
@@ -256,21 +263,20 @@ class Client
                 $data = json_encode($params);
                 $response = $this->getHttpClient()->post($uri, $data);
                 break;
-            case HttpClient::PUT:
-                $data = json_encode($params);
-                $response = $this->getHttpClient()->put($uri, $data);
-                break;
-            case HttpClient::DELETE:
-                $data = json_encode($params);
-                $response = $this->getHttpClient()->delete($uri, $data);
-                break;
+            case 'PUT':
+            case 'DELETE':
             default:
                 throw new \RuntimeException(
-                    'Currently only "GET", "POST", "PUT" and "DELETE" are supported'
+                    'Currently only "GET" and "POST" are supported. "PUT" and '
+                    . '"DELETE" functionality is currently under development'
                 );
         }
 
         $response = json_decode($response);
+
+        if (isset($response->errors)) {
+            throw new \RuntimeException($response->errors);
+        }
 
         return $response;
 
@@ -280,7 +286,7 @@ class Client
      * get the HTTP Client
      * @return HttpClient
      */
-    public function getHttpClient()
+    protected function getHttpClient()
     {
         return $this->httpClient;
     }
@@ -309,7 +315,7 @@ class Client
      */
     protected function getClientSecret()
     {
-        return $this->sharedSecret;
+        return $this->clientSecret;
     }
 
     /**
