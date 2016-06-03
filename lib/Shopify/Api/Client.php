@@ -122,52 +122,61 @@ class Client
 
     /**
      * generate the signature as required by shopify
-     * @param array $params
+     * @param array $request
+     * @see https://docs.shopify.com/api/authentication/oauth#confirming-installation
      * @return string
      */
-    public function generateSignature(array $params)
+    public function generateSignature(array $request)
     {
 
-        // Collect the URL parameters into an array of elements of the format
-        // "$parameter_name=$parameter_value"
+        $params = $request;
+        
+        // The signature and hmac entries are removed from the map, leaving the
+        // remaining parameters.
+        unset($params['signature']);
+        unset($params['hmac']);
+        
 
-        $calculated = array();
+        // Each key is concatenated with its value, seperated by an = character,
+        // to create a list of strings
+        $collected = array_map(function($key, $value) {
+            return $key . "=" . $value;
+        }, array_keys($params), $params);
+        
+        
+        // The list of key-value pairs is sorted lexicographically
+        sort($collected);
 
-        foreach ($params as $key => $value) {
-            $calculated[] = $key . "=" . $value;
-        }
+        // and concatenated together with & to create a single string
+        $collected = implode('&', $collected);
 
-        // Sort the key/value pairs in the array
-        sort($calculated);
-
-        // Join the array elements into a string
-        $calculated = implode('', $calculated);
-
-        // Final calculated_signature to compare against
-        return md5($this->getClientSecret() . $calculated);
+        // this string processed through an HMAC-SHA256 using the Shared Secret
+        // as the key
+        return hash_hmac('sha256', $collected, $this->getClientSecret());
 
     }
 
     /**
      * validate the signature on the supplied query parameters
+     * @param array $request
      * @return boolean
      */
-    public function validateSignature(array $params)
+    public function validateSignature(array $request)
     {
 
         $this->assertRequestParamIsNotNull(
-            $params, 'signature', 'Expected signature in query params'
+            $request, 'hmac', 'Expected signature in query params'
         );
 
-        $signature = $params['signature'];
-        unset($params['signature']);
+        $hmac = $request['hmac'];
 
-        return $this->generateSignature($params) === $signature;
+        return $this->generateSignature($request) === $hmac;
 
     }
 
     /**
      * returns true if the supplied request params are valid
+     * @param array $params
      * @return boolean
      */
     public function isValidRequest(array $params)
@@ -187,6 +196,7 @@ class Client
 
     /**
      * get the number of calls made to the shopify api
+     * @param array $headers
      * @return integer
      */
     public function getNumberOfCallsMade(array $headers)
@@ -196,6 +206,7 @@ class Client
 
     /**
      * get the total number of calls that can be made to the shopify api
+     * @param array $headers
      * @return integer
      */
     public function getCallLimit(array $headers)
