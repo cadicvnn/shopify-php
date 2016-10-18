@@ -2,8 +2,6 @@
 
 namespace Shopify\HttpClient;
 
-use Shopify\HttpClient;
-
 class CurlHttpClient extends HttpClientAdapter
 {
 

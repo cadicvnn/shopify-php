@@ -6,7 +6,7 @@ interface Redirector
 {
 
     /**
-     * rediect to the supplied uri
+     * redirect to the supplied uri
      * @param string $uri
      * @return mixed
      */

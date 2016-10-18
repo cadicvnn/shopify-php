@@ -89,8 +89,10 @@ class AuthenticationGateway
 
     /**
      * initiate the login process
+     * @param string $state
+     * @return mixed
      */
-    public function initiateLogin()
+    public function initiateLogin($state = null)
     {
 
         if (!$this->canInitiateLogin()) {
@@ -99,7 +101,7 @@ class AuthenticationGateway
             );
         }
 
-        $uri = $this->getAuthenticationUri();
+        $uri = $this->getAuthenticationUri($state);
         return $this->redirector->redirect($uri);
 
     }
@@ -155,9 +157,10 @@ class AuthenticationGateway
     /**
      * build the shopify authentication uri that users are
      * forwarded to for authentication
+     * @param string $state
      * @return string
      */
-    public function getAuthenticationUri()
+    public function getAuthenticationUri($state = null)
     {
 
         $authorizeUri = sprintf(self::AUTHORIZATION_URI, $this->getShopName());
@@ -169,6 +172,10 @@ class AuthenticationGateway
 
         if ($this->getRedirectUri()) {
             $uriParams['redirect_uri'] = $this->getRedirectUri();
+        }
+
+        if ($state) {
+            $uriParams['redirect_uri'] = $state;
         }
 
         return $authorizeUri . '?' . http_build_query($uriParams);
