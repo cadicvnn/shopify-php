@@ -175,7 +175,7 @@ class AuthenticationGateway
         }
 
         if ($state) {
-            $uriParams['redirect_uri'] = $state;
+            $uriParams['state'] = $state;
         }
 
         return $authorizeUri . '?' . http_build_query($uriParams);
