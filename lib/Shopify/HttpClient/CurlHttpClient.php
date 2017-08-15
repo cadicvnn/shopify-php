@@ -192,6 +192,18 @@ class CurlHttpClient extends HttpClientAdapter
         $error = curl_error($ch);
         $code = curl_errno($ch);
 
+        $retry = 0;
+        while ($code === CURLE_COULDNT_RESOLVE_HOST && $retry < 3) {
+            sleep(1 + $retry);
+
+            $response = curl_exec($ch);
+
+            $error = curl_error($ch);
+            $code = curl_errno($ch);
+
+            $retry++;
+        }
+
         if ($error) {
             curl_close($ch);
             throw new \RuntimeException($error, $code);
@@ -202,4 +214,8 @@ class CurlHttpClient extends HttpClientAdapter
 
     }
 
+    private function makeRequestExternal($ch)
+    {
+
+    }
 }
