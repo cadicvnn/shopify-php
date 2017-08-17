@@ -213,9 +213,4 @@ class CurlHttpClient extends HttpClientAdapter
         return $response;
 
     }
-
-    private function makeRequestExternal($ch)
-    {
-
-    }
 }
