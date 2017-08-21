@@ -123,10 +123,11 @@ class Client
     /**
      * generate the signature as required by shopify
      * @param array $request
+     * @param string $join
      * @see https://docs.shopify.com/api/authentication/oauth#confirming-installation
      * @return string
      */
-    public function generateSignature(array $request)
+    public function generateSignature(array $request, $join = '&')
     {
 
         $params = $request;
@@ -148,7 +149,7 @@ class Client
         sort($collected);
 
         // and concatenated together with & to create a single string
-        $collected = implode('&', $collected);
+        $collected = implode($join, $collected);
 
         // this string processed through an HMAC-SHA256 using the Shared Secret
         // as the key
@@ -170,7 +171,25 @@ class Client
 
         $hmac = $request['hmac'];
 
-        return $this->generateSignature($request) === $hmac;
+        return $this->generateSignature($request, '&') === $hmac;
+
+    }
+
+    /**
+     * validate the signature on the supplied query parameters
+     * @param array $request
+     * @return boolean
+     */
+    public function validateProxySignature(array $request)
+    {
+
+        $this->assertRequestParamIsNotNull(
+            $request, 'signature', 'Expected signature in query params'
+        );
+
+        $hmac = $request['signature'];
+
+        return $this->generateSignature($request, '') === $hmac;
 
     }
 
@@ -191,6 +210,26 @@ class Client
         $olderThanOneDay = $requestTimestamp < (time() - $secondsPerDay);
 
         return ($olderThanOneDay) ? false : $this->validateSignature($params);
+
+    }
+
+    /**
+     * returns true if the supplied proxy request params are valid
+     * @param array $params
+     * @return boolean
+     */
+    public function isValidProxyRequest(array $params)
+    {
+
+        $this->assertRequestParamIsNotNull(
+            $params, 'timestamp', 'Expected timestamp in query params'
+        );
+
+        $requestTimestamp = $params['timestamp'];
+        $secondsPerDay = 24 * 60 * 60;
+        $olderThanOneDay = $requestTimestamp < (time() - $secondsPerDay);
+
+        return ($olderThanOneDay) ? false : $this->validateProxySignature($params);
 
     }
 
