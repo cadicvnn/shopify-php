@@ -193,7 +193,7 @@ class CurlHttpClient extends HttpClientAdapter
         $code = curl_errno($ch);
 
         $retry = 0;
-        while (($code === CURLE_COULDNT_RESOLVE_HOST || $code === 429) && $retry < 3) {
+        while (($code === CURLE_COULDNT_RESOLVE_HOST || $code === 429) && $retry < 6) {
             sleep(1 + $retry);
 
             $response = curl_exec($ch);
