@@ -188,25 +188,25 @@ class CurlHttpClient extends HttpClientAdapter
         }
 
         $response = curl_exec($ch);
-
         $error = curl_error($ch);
-        $code = curl_errno($ch);
 
+        // Get http code from response
+        $responseHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $retry = 0;
-        while (($code === CURLE_COULDNT_RESOLVE_HOST || $code === 429) && $retry < 6) {
+
+        // Retry 6 times for preventing call limit API
+        while (($responseHttpCode === CURLE_COULDNT_RESOLVE_HOST || $responseHttpCode === 429) && $retry < 6) {
             sleep(1 + $retry);
-
             $response = curl_exec($ch);
-
             $error = curl_error($ch);
-            $code = curl_errno($ch);
+            $responseHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             $retry++;
         }
 
         if ($error) {
             curl_close($ch);
-            throw new \RuntimeException($error, $code);
+            throw new \RuntimeException($error, $responseHttpCode);
         }
 
         curl_close($ch);
