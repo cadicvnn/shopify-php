@@ -29,7 +29,7 @@ root directory and require shopify-php:
 
     {
       "require": {
-        "offshoot/shopify-php": "0.10.x"
+        "cadicvnn/shopify-php": "dev-master"
       }
     }
 
@@ -47,7 +47,7 @@ might look something like this:
 
     {
       "require": {
-        "offshoot/shopify-php": "0.10.x",
+        "cadicvnn/shopify-php": "dev-master",
         "haxx-se/curl": "1.0.0"
       },
       "repositories": [
